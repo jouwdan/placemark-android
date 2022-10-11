@@ -1,10 +1,10 @@
 package com.jordharr.placemark
 
-import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 import com.jordharr.placemark.databinding.ActivityMainBinding
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,9 +16,20 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.greetingButton.setOnClickListener {
-            val greetingText = getString(R.string.greeting_text)
-            Toast.makeText(applicationContext, greetingText, Toast.LENGTH_LONG).show()
+        Timber.plant(Timber.DebugTree())
+
+        Timber.i("Placemark Activity has started...")
+
+        binding.btnAdd.setOnClickListener() {
+            val placemarkTitle = binding.placemarkTitle.text.toString()
+            if (placemarkTitle.isNotEmpty()) {
+                Timber.i("add Button Pressed: $placemarkTitle")
+            }
+            else {
+                Snackbar
+                    .make(it,"Please Enter a title", Snackbar.LENGTH_LONG)
+                    .show()
+            }
         }
     }
 }
