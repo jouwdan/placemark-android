@@ -1,18 +1,24 @@
 package com.jordharr.placemark.activities
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.material.snackbar.Snackbar
 import com.jordharr.placemark.R
 import com.jordharr.placemark.databinding.ActivityPlacemarkBinding
+import com.jordharr.placemark.helpers.showImagePicker
 import com.jordharr.placemark.main.MainApp
 import com.jordharr.placemark.models.PlacemarkModel
+import com.squareup.picasso.Picasso
 import timber.log.Timber.Forest.i
 
 class PlacemarkActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlacemarkBinding
+    private lateinit var imageIntentLauncher : ActivityResultLauncher<Intent>
     var placemark = PlacemarkModel()
     var edit = false
     lateinit var app: MainApp
@@ -23,6 +29,7 @@ class PlacemarkActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.toolbarAdd.title = title
         setSupportActionBar(binding.toolbarAdd)
+        registerImagePickerCallback()
         app = application as MainApp
 
         if (intent.hasExtra("placemark_edit")) {
@@ -31,6 +38,13 @@ class PlacemarkActivity : AppCompatActivity() {
             binding.placemarkTitle.setText(placemark.title)
             binding.description.setText(placemark.description)
             binding.btnAdd.setText(R.string.save_placemark)
+            Picasso.get()
+                .load(placemark.image)
+                .into(binding.placemarkImage)
+        }
+
+        binding.chooseImage.setOnClickListener {
+            showImagePicker(imageIntentLauncher)
         }
 
         binding.btnAdd.setOnClickListener() {
@@ -61,5 +75,24 @@ class PlacemarkActivity : AppCompatActivity() {
             R.id.item_cancel -> { finish() }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun registerImagePickerCallback() {
+        imageIntentLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+            { result ->
+                when(result.resultCode){
+                    RESULT_OK -> {
+                        if (result.data != null) {
+                            i("Got Result ${result.data!!.data}")
+                            placemark.image = result.data!!.data!!
+                            Picasso.get()
+                                .load(placemark.image)
+                                .into(binding.placemarkImage)
+                        } // end of if
+                    }
+                    RESULT_CANCELED -> { } else -> { }
+                }
+            }
     }
 }
