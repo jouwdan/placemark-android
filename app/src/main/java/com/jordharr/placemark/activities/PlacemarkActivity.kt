@@ -24,11 +24,17 @@ class PlacemarkActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbarAdd)
         app = application as MainApp
 
+        if (intent.hasExtra("placemark_edit")) {
+            placemark = intent.extras?.getParcelable("placemark_edit")!!
+            binding.placemarkTitle.setText(placemark.title)
+            binding.description.setText(placemark.description)
+        }
+
         binding.btnAdd.setOnClickListener() {
             placemark.title = binding.placemarkTitle.text.toString()
             placemark.description = binding.description.text.toString()
             if (placemark.title.isNotEmpty()) {
-                app.placemarks.add(placemark.copy())
+                app.placemarks.create(placemark.copy())
                 setResult(RESULT_OK)
                 finish()
             }
