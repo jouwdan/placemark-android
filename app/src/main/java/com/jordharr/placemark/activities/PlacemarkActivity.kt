@@ -13,6 +13,7 @@ import com.jordharr.placemark.R
 import com.jordharr.placemark.databinding.ActivityPlacemarkBinding
 import com.jordharr.placemark.helpers.showImagePicker
 import com.jordharr.placemark.main.MainApp
+import com.jordharr.placemark.models.Location
 import com.jordharr.placemark.models.PlacemarkModel
 import com.squareup.picasso.Picasso
 import timber.log.Timber.Forest.i
@@ -20,8 +21,10 @@ import timber.log.Timber.Forest.i
 class PlacemarkActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlacemarkBinding
     private lateinit var imageIntentLauncher : ActivityResultLauncher<Intent>
+    private lateinit var mapIntentLauncher : ActivityResultLauncher<Intent>
     var placemark = PlacemarkModel()
     var edit = false
+    var location = Location(52.245696, -7.139102, 15f)
     lateinit var app: MainApp
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,6 +34,7 @@ class PlacemarkActivity : AppCompatActivity() {
         binding.toolbarAdd.title = title
         setSupportActionBar(binding.toolbarAdd)
         registerImagePickerCallback()
+        registerMapCallback()
         app = application as MainApp
 
         if (intent.hasExtra("placemark_edit")) {
@@ -45,6 +49,12 @@ class PlacemarkActivity : AppCompatActivity() {
             if (placemark.image != Uri.EMPTY) {
                 binding.chooseImage.setText(R.string.change_placemark_image)
             }
+        }
+
+        binding.placemarkLocation.setOnClickListener {
+            val launcherIntent = Intent(this, MapActivity::class.java)
+                .putExtra("location", location)
+            mapIntentLauncher.launch(launcherIntent)
         }
 
         binding.chooseImage.setOnClickListener {
@@ -95,6 +105,22 @@ class PlacemarkActivity : AppCompatActivity() {
                                 .into(binding.placemarkImage)
                             binding.chooseImage.setText(R.string.change_placemark_image)
                         }
+                    }
+                    RESULT_CANCELED -> { } else -> { }
+                }
+            }
+    }
+    private fun registerMapCallback() {
+        mapIntentLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+            { result ->
+                when (result.resultCode) {
+                    RESULT_OK -> {
+                        if (result.data != null) {
+                            i("Got Location ${result.data.toString()}")
+                            location = result.data!!.extras?.getParcelable("location")!!
+                            i("Location == $location")
+                        } // end of if
                     }
                     RESULT_CANCELED -> { } else -> { }
                 }
