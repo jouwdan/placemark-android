@@ -13,9 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Placemark">
         <activity
-            android:name=".SplashActivity"
-            android:exported="false" />
-        <activity
             android:name=".activities.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
